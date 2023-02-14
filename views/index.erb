@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+  <div class="flex">
+    <h1>メモアプリ</h1>
+
+      <form action="/memos/new" method="GET">
+        <div class="add"><button type="submit">追加</button></div>
+      </form>
+  </div>
+
+      <% @hash["memo"].each do |v| %>
+      <div>
+        <ul>
+          <li><a href="http://localhost:4567/memos/<%= v["id"] %>"><%= h v["title"] %></li>
+        </ul>
+      </div>
+      <% end %>
+  </body>
+</html>
