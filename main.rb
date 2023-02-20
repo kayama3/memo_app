@@ -22,15 +22,15 @@ class Memo
 
   def self.file(title, text)
     hash = Memo.all
-    hash['memo'] << { "id": @id += 1,
-                      "title": title == '' ? 'NO TITLE' : title,
-                      "text": text }
+    hash << { "id": @id += 1,
+              "title": title == '' ? 'NO TITLE' : title,
+              "text": text }
     hash
   end
 
   def self.edit(id, title, text)
     hash = Memo.all
-    hash['memo'].each do |v|
+    hash.each do |v|
       if v['id'].to_s == id
         v['title'] = title
         v['text'] = text
@@ -40,15 +40,11 @@ class Memo
   end
 
   def self.delete(id)
-    hash = Memo.all
-    hash['memo'].each do |v|
-      %w[id title text].each { |k| v.delete(k) } if v['id'].to_s == id
-    end
-    hash['memo'].delete({})
+    hash = Memo.all.reject { |i| i['id'].to_s == id }
     Memo.write(hash)
   end
 end
-Memo.write({ "memo": [] })
+Memo.write([])
 
 helpers do
   include Rack::Utils

@@ -13,7 +13,7 @@
       </form>
   </div>
 
-      <% @hash["memo"].each do |v| %>
+      <% @hash.each do |v| %>
       <div>
         <ul>
           <li><a href="http://localhost:4567/memos/<%= v["id"] %>"><%= h v["title"] %></li>

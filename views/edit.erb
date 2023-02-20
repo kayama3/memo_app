@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>メモアプリ</h1>
-    <% @hash["memo"].each do |v| %>
+    <% @hash.each do |v| %>
       <form action="/memos/<%= v["id"] %>" method="POST">
         <input type="hidden" name="_method" value="PATCH">
 
