@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h1>メモアプリ</h1>
+    <% @hash.each do |v| %>
+      <% if v["id"].to_s == params["id"] %>
+        <section>
+          <h2><%= h v["title"] %></h2>
+          <p><%= h v["text"] %></p>
+        </section>
+
+      <div class="flex">
+        <form action="/memos/<%= v["id"] %>/edit" method="GET">
+          <button type="submit">変更</button>
+        </form>
+
+        <form action="/memos/<%= v["id"] %>" method="POST">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit">消去</button>
+        </form>
+      </div>
+      <% end %>
+    <% end %>
+  </body>
+</html>
