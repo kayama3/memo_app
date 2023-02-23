@@ -10,7 +10,6 @@
       <form action="/memos/<%= v["id"] %>" method="POST">
         <input type="hidden" name="_method" value="PATCH">
 
-        <% if v["id"].to_s == params["id"] %>
           <div class="title">
             <textarea name="title" rows="3" cols="100"><%= v["title"] %></textarea>
           </div>
@@ -22,7 +21,6 @@
           <div class="save">
             <button type="submit">変更</button>
           </div>
-        <% end %>
       </form>
     <% end %>
   </body>
