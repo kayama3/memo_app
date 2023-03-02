@@ -1,50 +1,44 @@
 # frozen_string_literal:true
 
-require 'json'
 require 'sinatra'
 require 'sinatra/reloader'
+require 'pg'
 
 # Description/Explanation of Memo class
 class Memo
-  @id = 0
+  CONNECT = PG.connect(dbname: 'memo_app')
 
-  def self.write(file)
-    File.open('database.json', 'w') do |f|
-      JSON.dump(file, f)
+  statement_sql = { 'create' => 'INSERT INTO Memo(title, text) VALUES ($1, $2)',
+                    'all' => 'SELECT * FROM Memo ORDER BY id',
+                    'find' => 'SELECT * FROM Memo WHERE id=$1',
+                    'update' => 'UPDATE Memo SET title=$2, text=$3 WHERE id=$1',
+                    'delete' => 'DELETE FROM Memo WHERE id=$1' }
+
+  statement_sql.each { |key, val| CONNECT.prepare(key, val) }
+
+  class << self
+    def create(title: memo_title, text: memo_text)
+      params = [title == '' ? 'NO TITLE' : title, text]
+      CONNECT.exec_prepared('create', params)
     end
-  end
 
-  def self.all
-    File.open('database.json') do |f|
-      JSON.parse(f.read)
+    def all
+      CONNECT.exec_prepared('all').to_a
     end
-  end
 
-  def self.file(title, text)
-    hash = Memo.all
-    hash << { "id": @id += 1,
-              "title": title == '' ? 'NO TITLE' : title,
-              "text": text }
-    hash
-  end
-
-  def self.edit(id, title, text)
-    hash = Memo.all
-    hash.each do |v|
-      if v['id'].to_s == id
-        v['title'] = title
-        v['text'] = text
-      end
+    def find(id: memo_id)
+      CONNECT.exec_prepared('find', [id]).to_a
     end
-    Memo.write(hash)
-  end
 
-  def self.delete(id)
-    hash = Memo.all.reject { |i| i['id'].to_s == id }
-    Memo.write(hash)
+    def update(id: memo_id, title: memo_title, text: memo_text)
+      CONNECT.exec_prepared('update', [id, title, text])
+    end
+
+    def delete(id: memo_id)
+      CONNECT.exec_prepared('delete', [id])
+    end
   end
 end
-Memo.write([])
 
 helpers do
   include Rack::Utils
@@ -64,32 +58,31 @@ end
 
 # 新しいメモを作成
 post '/memos' do
-  new = Memo.file(params[:title], params[:text])
-  Memo.write(new)
+  Memo.create(title: params[:title], text: params[:text])
   redirect '/memos'
 end
 
 # 指定のメモの情報を取得
 get '/memos/:id' do
-  @hash = Memo.all
+  @hash = Memo.find(id: params[:id])
   erb :show
 end
 
 # 指定メモを編集するフォームを表示
 get '/memos/:id/edit' do
-  @hash = Memo.all
+  @hash = Memo.find(id: params[:id])
   erb :edit
 end
 
 # 指定のメモを編集
 patch '/memos/:id' do
-  Memo.edit(params['id'], params['title'], params['text'])
+  Memo.update(id: params[:id], title: params[:title], text: params[:text])
   redirect '/memos'
 end
 
 # 指定のメモを消去
 delete '/memos/:id' do
-  Memo.delete(params['id'])
+  Memo.delete(id: params[:id])
   redirect '/memos'
 end
 
